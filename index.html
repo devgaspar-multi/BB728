@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <style>
+                        .lamina-layout {
+                          width: 100%;
+                        }
+                        
+                        .lamina-layout-desktop {
+                          overflow: hidden;
+                        }
+                        
+                        .lamina-layout-desktop-inner {
+                          flex: 0 0 var(--lamina-desktop-width, 100%);
+                          width: var(--lamina-desktop-width, 100%);
+                          max-width: none;
+                          transform-origin: top center;
+                        }
+                        
+                        .lamina-layout-mobile {
+                          display: none;
+                        }
+                        
+                        @media (min-width: 1025px) {
+                          .lamina-layout-desktop {
+                            display: flex !important;
+                            justify-content: center;
+                            align-items: flex-start;
+                          }
+                        
+                          .lamina-layout-mobile {
+                            display: none !important;
+                          }
+                        }
+                        
+                        @media (max-width: 1024px) {
+                          .lamina-layout-desktop {
+                            display: none !important;
+                          }
+                        
+                          .lamina-layout-mobile {
+                            display: block !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            overflow-x: hidden !important;
+                          }
+                        
+                          .lamina-layout-mobile > * {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                          }
+                        }
+                        </style>
+    <style>
+                        *, *::before, *::after {
+                          box-sizing: border-box;
+                        }
+                        
+                        body:not(.lamina-has-mobile-layout) img,
+                        body:not(.lamina-has-mobile-layout) video,
+                        body:not(.lamina-has-mobile-layout) iframe,
+                        body:not(.lamina-has-mobile-layout) svg {
+                          max-width: 100%;
+                          height: auto;
+                        }
+                        
+                        .lamina-wrapper {
+                          content-visibility: auto;
+                          contain-intrinsic-size: 1200px;
+                          width: 100%;
+                        }
+                        
+                        /* Custom elegant scrollbar inside the landing page */
+                        ::-webkit-scrollbar {
+                          width: 8px;
+                          height: 8px;
+                        }
+                        ::-webkit-scrollbar-track {
+                          background: transparent;
+                        }
+                        ::-webkit-scrollbar-thumb {
+                          background: rgba(138, 138, 150, 0.3);
+                          border-radius: 4px;
+                        }
+                        ::-webkit-scrollbar-thumb:hover {
+                          background: rgba(138, 138, 150, 0.5);
+                        }
+                        
+                        @media (max-width: 1024px) {
+                          /* Forçar o container principal (primeira div filha do body) a 100% largura e permitir rolagem */
+                          html, body {
+                            height: auto !important;
+                            overflow-y: auto !important;
+                            overflow-x: hidden !important;
+                          }
+                        
+                          body:not(.lamina-has-mobile-layout) > div,
+                          body:not(.lamina-has-mobile-layout) .lamina-wrapper,
+                          body:not(.lamina-has-mobile-layout) .lamina-wrapper > div {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                          }
+                        
+                          body.lamina-has-mobile-layout .lamina-wrapper,
+                          body.lamina-has-mobile-layout .lamina-layout-mobile {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                          }
+                        
+                          /*
+                           * Mobile/tablet image normalization.
+                           * Remove this block if future exports should preserve image left offsets below 1024px.
+                           */
+                          /* lamina-qa: escopado para nao esticar as imagens do layout mobile dedicado */
+                          body:not(.lamina-has-mobile-layout) img {
+                            width: 100% !important;
+                            left: 0px !important;
+                          }
+                        
+                          /* Imagens: altura fluida em laminas sem layout mobile dedicado */
+                          body:not(.lamina-has-mobile-layout) img {
+                            height: auto !important;
+                          }
+                        
+                          /* Containers flex/inline-flex: empilhar em coluna e ajustar altura */
+                          body:not(.lamina-has-mobile-layout) [style*="inline-flex"],
+                          body:not(.lamina-has-mobile-layout) [style*="display: flex"] {
+                            flex-direction: column !important;
+                            align-items: stretch !important;
+                            height: auto !important;
+                          }
+                        
+                          /* Reduzir paddings laterais excessivos */
+                          body:not(.lamina-has-mobile-layout) [style*="padding-left"],
+                          body:not(.lamina-has-mobile-layout) [style*="padding-right"] {
+                            padding-left: 16px !important;
+                            padding-right: 16px !important;
+                          }
+                        
+                          /* Quebra de texto */
+                          body:not(.lamina-has-mobile-layout) [style*="white-space: nowrap"] {
+                            white-space: normal !important;
+                            overflow-wrap: break-word !important;
+                          }
+                        }
+                        </style>
+    <style>
+                        @media (max-width: 427px) {
+                          body.lamina-has-mobile-layout .lamina-layout-mobile [data-lamina-fluid-small="true"] {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            left: 0 !important;
+                          }
+                        }
+                        
+                        @media (min-width: 429px) and (max-width: 1000px) {
+                          body.lamina-has-mobile-layout .lamina-layout-mobile [data-lamina-fluid-tablet="true"] {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            left: 0 !important;
+                          }
+                        }
+                        </style>
+    <style>
+                /* lamina-qa - escala proporcional da prancheta mobile (<= 1024px) */
+                @media (max-width: 1024px) {
+                  body.lamina-has-mobile-layout .lamina-layout-mobile[data-lamina-fit] {
+                    position: relative;
+                    overflow: hidden !important;
+                    height: var(--lamina-fit-height, auto);
+                  }
+                
+                  body.lamina-has-mobile-layout .lamina-layout-mobile[data-lamina-fit] > [data-lamina-fit-board] {
+                    width: var(--lamina-fit-width, 428px) !important;
+                    max-width: none !important;
+                    margin-left: var(--lamina-fit-offset, 0px);
+                    vertical-align: top;
+                    transform: scale(var(--lamina-fit-scale, 1));
+                    transform-origin: top left;
+                  }
+                }
+                </style>
+    <style>
+                /* BB728 - fallbacks caso as fontes proprietarias nao carreguem */
+                .lamina-wrapper [style*="font-family: Avenir"] {
+                  font-family: Avenir, "Avenir Next", Montserrat, Arial, sans-serif !important;
+                }
+            
+                .lamina-wrapper [style*="Be Glyphs"] {
+                  font-family: "Let's Be Glyphs", "Arial Rounded MT Bold", Montserrat, sans-serif !important;
+                }
+            
+                /* BB728 - sem Avenir Heavy/Black publicadas: pesos 800/900 usam Nunito Sans (a Avenir Next Regular
+           nao recebe negrito sintetico no 800 e o 900 fica borrado) */
+        .lamina-wrapper [style*="font-family: Avenir"][style*="font-weight: 800"],
+        .lamina-wrapper [style*="font-family: Avenir"][style*="font-weight: 900"] {
+          font-family: "Nunito Sans", Avenir, Arial, sans-serif !important;
+        }
+    
+        /* BB728 - desktop: faixa de beneficios em 3 colunas (Frame 1 do Figma).
+                   O export achatou os grupos numa linha flex com div vazios. */
+                .bb728-benefit {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  flex: 0 0 auto;
+                }
+            
+                .bb728-benefit > img {
+                  margin-bottom: 54px;
+                }
+            
+                .bb728-benefit > img[style*="168px"] {
+                  margin-bottom: 55px;
+                }
+            
+                .bb728-benefit > div {
+                  width: 100%;
+                }
+            
+                /* BB728 - svg inline fica na linha de base e desce alguns px */
+                .lamina-wrapper [data-svg-wrapper] > svg {
+                  display: block;
+                }
+                </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" data-lamina-font-import="">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" data-lamina-font-import="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" data-lamina-font-import="montserrat">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet" data-lamina-font-import="nunito-sans">
+    <style data-lamina-font-import="avenir">
+        @font-face {
+          font-family: "Avenir";
+          src: url("https://multilaser.vteximg.com.br/arquivos/avenir-next-lt-pro.otf.css") format("opentype");
+          font-weight: 300 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        </style>
+    <style data-lamina-font-import="lets-be-glyphs">
+        @font-face {
+          font-family: "Let's Be Glyphs";
+          src: url("https://multilaser.vteximg.com.br/arquivos/LetsBeGlyphs-Regular.otf.css") format("opentype");
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: "Let's Be Glyphs";
+          src: url("https://multilaser.vteximg.com.br/arquivos/LetsBeGlyphs-Bouncy.otf.css") format("opentype");
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        </style>
+  </head>
+  <body class="lamina-has-mobile-layout" style="overflow-x: hidden">
+    <div class="lamina-wrapper">
+      <div class="lamina-layout lamina-layout-desktop" data-design-width="1907" style="--lamina-desktop-width: 1907px">
+        <div class="lamina-layout-desktop-inner">
+          <div class="bb728-1" style="width: 1907px; height: 5618px; position: relative; background: white; overflow: hidden">
+            <div class="bb728-2" style="width: 1907px; height: 921px; left: 0px; top: 4697px; position: absolute; background: #59CBE8; overflow: hidden">
+              <div class="bb728-3" style="width: 481px; height: 66.28px; left: 874px; top: 295px; position: absolute; text-align: right; color: white; font-size: 48px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 49.64px; word-wrap: break-word">Ficha técnica:</div>
+              <div class="bb728-4" style="width: 613px; height: 572px; left: 1082px; top: 361px; position: absolute">
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Marca: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">Fisher-Price™ <br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Tipo de material: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">plástico e metal<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Composição: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 500; word-wrap: break-word">HDPE e ferro<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Tipo de arreio: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">sistema de retenção isofix <br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Cor: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">preta<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Dimensões do produto: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">16 x 34 x 61 cm<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">EAN: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">7899548508740<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Garantia: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">12 meses<br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Conteúdo da embalagem: </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 400; word-wrap: break-word">1 base Isofix e 1 manual de instruções. <br>
+                </span>
+                <span style="color: white; font-size: 25px; font-family: Avenir; font-weight: 900; word-wrap: break-word">
+                  <br>
+                </span>
+              </div>
+              <img class="bb728-5" style="width: 981px; height: 844px; left: -6px; top: 77px; position: absolute" src="assets/bb728-1.png" decoding="async" fetchpriority="high" loading="eager">
+            </div>
+            <div class="bb728-6" style="width: 1907px; height: 892px; left: 0px; top: 3805px; position: absolute; background: white; overflow: hidden">
+              <div class="bb728-7" style="width: 541px; height: 138px; left: 1161px; top: 472px; position: absolute; color: black; font-size: 26px; font-family: Avenir; font-weight: 500; word-wrap: break-word">Um produto que oferece cuidado, segurança e conforto para aproveitar cada fase de crescimento do seu pequeno com mais tranquilidade.</div>
+              <div class="bb728-8" style="width: 462px; height: 107px; left: 1161px; top: 282px; position: absolute; color: black; font-size: 48px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 49.64px; word-wrap: break-word">Fisher-Price™ confiança que cresce junto </div>
+              <img class="bb728-9" style="width: 1808px; height: 892px; left: 99px; top: 0px; position: absolute" src="assets/bb728-2.png" decoding="async" loading="lazy">
+              <div class="bb728-10" style="width: 474px; height: 217px; left: 1161px; top: 693px; position: absolute; color: black; font-size: 26px; font-family: Avenir; font-weight: 500; word-wrap: break-word">Bebê conforto BB727 vendido separadamente.</div>
+            </div>
+            <div class="bb728-11" style="width: 1920px; height: 1015px; left: -6px; top: 2790px; position: absolute; background: #F1EFED; overflow: hidden">
+              <img class="bb728-13" style="width: 1907px; height: 1015px; left: 7px; top: 0px; position: absolute" src="assets/bb728-3.png" decoding="async" loading="lazy">
+              <div class="bb728-10" style="width: 474px; height: 217px; left: 193px; top: 639px; position: absolute; color: black; font-size: 20px; font-family: Avenir; font-weight: 400; word-wrap: break-word">Bebê conforto BB727 vendido separadamente.</div>
+              <div class="bb728-10" style="width: 474px; height: 217px; left: 196px; top: 448px; position: absolute; color: black; font-size: 26px; font-family: Avenir; font-weight: 500; word-wrap: break-word">Instalação rápida e intuitiva, simplifica o encaixe do bebê conforto, deixando a rotina da família mais leve e descomplicada. </div>
+              <div class="bb728-17" style="width: 460px; height: 143px; left: 193px; top: 311px; position: absolute; color: black; font-size: 48px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 49.64px; word-wrap: break-word">Mais praticidade<br>para o seu dia a dia</div>
+            </div>
+            <div class="bb728-18" style="width: 1906px; height: 1064px; left: 0px; top: 1726px; position: absolute; background: white; overflow: hidden">
+              <div class="bb728-19" style="width: 646px; height: 169px; left: 1055px; top: 473px; position: absolute; color: black; font-size: 26px; font-family: Avenir; font-weight: 500; word-wrap: break-word">Projetada para ser o alicerce de proteção do seu bebê. A combinação dos conectores Isofix com<br>a perna de suporte cria uma ancoragem dupla que mantém a base bem ajustada e sem oscilações. <br>
+              </div>
+              <div class="bb728-20" style="width: 662px; height: 157px; left: 1055px; top: 295px; position: absolute; color: black; font-size: 48px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 49.64px; word-wrap: break-word">Mais segurança e estabilidade em cada trajeto</div>
+              <img class="bb728-21" style="width: 1907px; height: 1064px; left: -1px; top: 0px; position: absolute" src="assets/bb728-4.png" decoding="async" loading="lazy">
+              <img class="bb728-22" style="width: 829px; height: 829px; left: 131px; top: 156px; position: absolute" src="assets/bb728-5.png" decoding="async" loading="lazy">
+            </div>
+            <div class="bb728-23" style="width: 1920px; height: 525px; left: 0px; top: 1201px; position: absolute; background: #F1EFED; overflow: hidden">
+              <div class="bb728-24" style="left: 311px; top: 58px; position: absolute; justify-content: flex-start; align-items: flex-start; gap: 197px; display: flex">
+                <div class="bb728-benefit" style="width: 266px">
+                  <img style="width: 169px; height: 169px" src="assets/bb728-6.png" alt="" decoding="async" loading="lazy">
+                  <div style="text-align: center">
+                    <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 800; line-height: 31.36px; word-wrap: break-word">Fixação reforçada<br>
+                    </span>
+                    <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 400; line-height: 31.36px; word-wrap: break-word">
+                      <br>Sistema de retenção Isofix + perna de suporte para maior estabilidade no veículo.</span>
+                    </div>
+                  </div>
+                  <div class="bb728-benefit" style="width: 319px">
+                    <img style="width: 168px; height: 168px" src="assets/bb728-7.png" alt="" decoding="async" loading="lazy">
+                    <div style="text-align: center">
+                      <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 800; text-transform: capitalize; line-height: 31.36px; word-wrap: break-word">Encaixe com um clique<br>
+                      </span>
+                      <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 400; text-transform: capitalize; line-height: 31.36px; word-wrap: break-word">
+                        <br>Facilidade para colocar e retirar o bebê conforto.</span>
+                      </div>
+                    </div>
+                    <div class="bb728-benefit" style="width: 319px">
+                      <img style="width: 168px; height: 168px" src="assets/bb728-8.png" alt="" decoding="async" loading="lazy">
+                      <div style="text-align: center">
+                        <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 800; line-height: 31.36px; word-wrap: break-word">Acompanha desde o primeiro dia<br>
+                        </span>
+                        <span style="color: black; font-size: 28px; font-family: Avenir; font-weight: 400; line-height: 31.36px; word-wrap: break-word">Para bebês de 40 a 87 cm.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bb728-32" style="width: 1907px; height: 1202px; left: 0px; top: -1px; position: absolute; background: linear-gradient(180deg, white 0%, rgba(255, 255, 255, 0) 100%); overflow: hidden">
+                  <img class="bb728-33" style="width: 1907px; height: 1202px; left: 0px; top: 0px; position: absolute" src="assets/bb728-9.png" decoding="async" loading="lazy">
+                  <div data-svg-wrapper="" class="bb728-14" style="left: 181px; top: 1px; position: absolute">
+                    <svg width="531" height="205" viewBox="0 0 531 205" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M528.744 0H2.25608C1.01207 0 0 1.01207 0 2.25608V159.464C0 161.531 0.759053 163.534 2.10848 165.115C23.0457 189.342 53.9561 204.691 88.493 204.691C123.03 204.691 156.07 188.266 176.986 162.585C197.923 188.266 229.761 204.691 265.479 204.691C301.197 204.691 333.056 188.266 353.972 162.585C374.909 188.266 406.768 204.691 442.465 204.691C478.161 204.691 507.933 189.342 528.849 165.115C530.199 163.555 530.958 161.552 530.958 159.464V2.25608C530.958 1.01207 529.946 0 528.702 0" fill="#E91D2D">
+                      </path>
+                    </svg>
+                  </div>
+                  <div data-svg-wrapper="" class="bb728-14" style="left: 211.23px; top: 41.29px; position: absolute">
+                    <svg width="468" height="102" viewBox="0 0 468 102" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M239.017 36.7087C239.017 32.6604 236.045 28.9494 231.026 28.9494C226.345 28.9494 222.192 32.8923 219.851 37.784C219.641 38.2057 219.008 38.2057 219.008 37.5731V33.314C219.008 31.3953 217.511 29.7928 215.508 29.7928H204.649C203.363 29.7928 202.625 30.6362 202.625 31.7116C202.625 33.7357 204.544 33.2086 204.544 38.7328V69.7064C204.544 75.2306 202.625 74.7035 202.625 76.7276C202.625 77.7819 203.363 78.6464 204.649 78.6464H219.008C220.083 78.6464 220.927 77.803 220.927 76.7276C220.927 74.7035 219.008 75.2306 219.008 69.7064V49.3806C219.008 44.1727 221.77 41.8323 223.9 41.8323C225.713 41.8323 227.948 44.489 231.448 44.489C236.234 44.489 238.996 40.6515 238.996 36.7297M150.356 69.6853L141.838 42.3383C139.075 33.5038 133.741 28.9284 127.479 28.9284C122.271 28.9284 119.382 31.7959 117.59 33.7146C117.168 34.2417 116.641 34.0309 116.641 33.6092V6.05134C116.641 4.9971 115.798 4.0272 114.617 4.0272H102.282C100.996 4.0272 100.258 4.87059 100.258 5.94592C100.258 7.97006 102.177 7.44294 102.177 12.9672V69.6853C102.177 75.2095 100.258 74.6824 100.258 76.7066C100.258 77.7608 100.996 78.6253 102.282 78.6253H116.641C117.695 78.6253 118.56 77.7819 118.56 76.7066C118.56 74.6824 116.641 75.2095 116.641 69.6853V45.2058C116.641 41.4738 118.665 38.7117 121.744 38.7117C124.822 38.7117 126.741 40.9467 128.027 45.2058L135.575 69.6853C137.072 75.336 134.5 75.2095 135.048 77.2337C135.365 78.309 136.102 78.6253 137.389 78.6253H152.612C153.687 78.6253 154.531 77.4656 154.214 76.3903C153.687 74.3661 152.085 75.2306 150.377 69.6853M194.95 61.0827C192.399 61.0827 190.48 62.6852 189.637 65.9744C188.793 69.0528 186.327 71.7305 181.667 71.7305C176.564 71.7305 172.727 67.9985 169.754 61.9472C169.543 61.5255 169.648 61.1038 170.176 60.8719L197.944 47.8836C198.682 47.5673 198.914 46.7029 198.788 45.8595C197.944 41.1786 190.586 29.4766 176.227 29.4766C164.103 29.4766 152.485 38.4165 152.485 54.0615C152.485 67.8931 162.69 79.5952 178.462 79.5952C191.134 79.5952 199.526 71.4986 199.526 65.7635C199.526 63.3177 197.818 61.0827 194.95 61.0827ZM166.317 54.0615C165.368 51.4048 164.925 49.2752 164.925 46.8294C164.925 40.7569 168.425 37.046 172.917 37.046C177.408 37.046 181.329 40.3352 183.67 45.986C183.775 46.3022 183.775 46.6185 183.459 46.7239L166.971 54.3777C166.654 54.4832 166.444 54.3777 166.338 54.0615M81.4085 49.2541C76.4114 46.7029 72.0468 44.3624 72.0468 40.9467C72.0468 37.8683 74.3872 35.7388 77.803 35.7388C81.6404 35.7388 83.5591 37.4466 84.5079 40.8413C85.2459 43.6034 87.2701 45.6275 90.3695 45.6275C93.9961 45.6275 95.5775 43.0763 95.5775 40.2087C95.5775 34.1363 87.3755 28.9284 78.4355 28.9284C66.4172 28.9284 60.2393 36.2659 60.2393 44.257C60.2393 51.8054 66.9443 56.1699 73.2276 59.6911C78.7518 62.7695 83.9808 65.2153 83.9808 68.6311C83.9808 71.3932 81.4296 73.3119 77.803 73.3119C74.1764 73.3119 72.0468 71.2878 71.098 67.6823C70.36 64.8147 68.5467 62.7906 65.3418 62.7906C61.6098 62.7906 60.0285 65.869 60.0285 68.2094C60.0285 75.0198 68.5467 79.9114 77.5921 79.9114C90.2641 79.9114 96.8636 73.5227 96.8636 64.7936C96.8636 57.0344 88.4508 52.9861 81.4296 49.2541M361.267 24.9012C365.948 24.9012 369.68 21.0637 369.68 16.3829C369.68 11.7021 365.948 7.97006 361.267 7.97006C356.586 7.97006 352.749 11.7021 352.749 16.3829C352.749 21.0637 356.481 24.9012 361.267 24.9012ZM54.3777 31.7116C54.3777 30.6573 53.5343 29.7928 52.459 29.7928H39.9979C38.7328 29.7928 37.9737 30.6362 37.9737 31.7116C37.9737 33.7357 39.8925 33.2086 39.8925 38.7328V69.7064C39.8925 75.2306 37.9737 74.7035 37.9737 76.7276C37.9737 77.7819 38.7117 78.6464 39.9979 78.6464H54.3566C55.4109 78.6464 56.2754 77.803 56.2754 76.7276C56.2754 74.7035 54.3566 75.2306 54.3566 69.7064V31.7116H54.3777ZM33.8411 7.75921C37.0249 7.75921 39.1545 8.6026 40.9678 10.0996C41.1786 10.3105 41.2841 10.5213 40.9678 10.8376C39.4708 12.3346 38.6274 14.4642 38.6274 16.8046C38.6274 21.4854 42.3594 24.9012 47.1456 24.9012C51.9319 24.9012 55.5585 20.9583 55.5585 16.2775C55.5585 7.86463 45.986 0 33.1032 0C19.5878 0 8.83454 8.93996 8.83454 27.1362V29.2657C8.83454 29.582 8.62369 29.7928 8.30742 29.7928H2.02414C1.07533 29.7928 0 30.7417 0 31.817V35.8653C0 37.0249 1.05424 37.8894 2.02414 37.8894H8.30742C8.62369 37.8894 8.83454 38.1003 8.83454 38.4165V69.7064C8.83454 75.2306 6.91582 74.7035 6.91582 76.7276C6.91582 77.7819 7.65379 78.6464 8.93996 78.6464H23.2987C24.374 78.6464 25.2174 77.803 25.2174 76.7276C25.2174 74.7035 23.2987 75.2306 23.2987 69.7064V38.4165C23.2987 38.1003 23.5096 37.8894 23.8258 37.8894H31.6905C32.7658 37.8894 33.7146 37.046 33.7146 35.8653V31.817C33.7146 30.7417 32.7658 29.7928 31.6905 29.7928H23.8258C23.5096 29.7928 23.2987 29.582 23.2987 29.2657V22.3499C23.2987 13.4099 27.4524 7.78029 33.8411 7.78029M412.672 62.7695C410.121 62.7695 408.202 64.6882 407.675 66.9232C406.6 70.8661 403.521 72.8902 399.578 72.8902C393.4 72.8902 389.584 66.8178 389.584 54.4832C389.584 42.1485 393.316 36.3924 399.367 36.3924C403.416 36.3924 405.334 38.3111 406.6 42.3594C407.443 45.0161 409.256 46.7239 412.229 46.7239C415.624 46.7239 417.543 44.2781 417.543 41.3052C417.543 34.7056 408.497 29.0549 399.557 29.0549C384.545 29.0549 374.234 39.1756 374.234 54.4832C374.234 69.7907 384.545 79.9114 399.557 79.9114C408.708 79.9114 417.753 74.2818 417.753 67.8931C417.753 65.131 415.835 62.7906 412.651 62.7906M249.222 46.7029L227.189 56.929C226.114 57.4561 225.692 58.8477 226.451 59.902C230.288 65.5316 237.837 67.7666 244.225 64.7936C250.72 61.8207 253.903 54.5675 251.985 47.989C251.668 46.8294 250.277 46.1757 249.222 46.7029ZM368.626 31.7116C368.626 30.6573 367.782 29.7928 366.707 29.7928H354.246C352.96 29.7928 352.222 30.6362 352.222 31.7116C352.222 33.7357 354.141 33.2086 354.141 38.7328V69.7064C354.141 75.2306 352.222 74.7035 352.222 76.7276C352.222 77.7819 352.96 78.6464 354.246 78.6464H368.605C369.68 78.6464 370.523 77.803 370.523 76.7276C370.523 74.7035 368.605 75.2306 368.605 69.7064V31.7116H368.626ZM462.58 61.0827C460.028 61.0827 458.11 62.6852 457.266 65.9744C456.423 69.0528 453.977 71.7305 449.275 71.7305C444.173 71.7305 440.335 67.9985 437.362 61.9472C437.151 61.5255 437.257 61.1038 437.784 60.8719L465.553 47.8836C466.291 47.5673 466.501 46.7029 466.396 45.8595C465.553 41.1786 458.194 29.4766 443.835 29.4766C431.712 29.4766 420.094 38.4165 420.094 54.0615C420.094 67.8931 430.32 79.5952 446.07 79.5952C458.742 79.5952 467.134 71.4986 467.134 65.7635C467.134 63.3177 465.426 61.0827 462.559 61.0827M433.947 54.0615C432.998 51.4048 432.555 49.2752 432.555 46.8294C432.555 40.7569 436.076 37.046 440.546 37.046C445.016 37.046 448.959 40.3352 451.299 45.986C451.405 46.3022 451.405 46.6185 451.089 46.7239L434.6 54.3777C434.284 54.4832 434.073 54.3777 433.968 54.0615M341.047 28.9284C336.366 28.9284 332.212 32.8712 329.872 37.7629C329.661 38.1846 329.029 38.1846 329.029 37.552V33.2929C329.029 31.3742 327.532 29.7718 325.507 29.7718H314.649C313.363 29.7718 312.625 30.6151 312.625 31.6905C312.625 33.7146 314.543 33.1875 314.543 38.7117V69.6853C314.543 75.2095 312.625 74.6824 312.625 76.7066C312.625 77.7608 313.363 78.6253 314.649 78.6253H329.007C330.083 78.6253 330.926 77.7819 330.926 76.7066C330.926 74.6824 329.007 75.2095 329.007 69.6853V49.3596C329.007 44.1516 331.77 41.8112 333.899 41.8112C335.712 41.8112 337.947 44.4679 341.447 44.4679C346.234 44.4679 348.996 40.6304 348.996 36.7087C348.996 32.7869 346.023 28.9494 341.005 28.9494M287.428 28.9284C282.009 28.9284 277.539 31.0579 274.335 34.4526C274.124 34.6634 273.913 34.6634 273.913 34.2417V33.2929C273.913 31.3742 272.31 29.7718 270.413 29.7718H259.554C258.268 29.7718 257.53 30.6151 257.53 31.6905C257.53 33.7146 259.449 33.1875 259.449 38.7117V92.1406C259.449 97.6649 257.53 97.1377 257.53 99.1619C257.53 100.237 258.268 101.081 259.554 101.081H273.913C274.988 101.081 275.832 100.237 275.832 99.1619C275.832 97.1377 273.913 97.6649 273.913 92.1406V75.8632C273.913 75.6523 274.229 75.5469 274.44 75.7577C277.413 78.6253 281.356 79.9114 285.826 79.9114C299.657 79.9114 308.914 69.5799 308.914 54.3777C308.914 39.1756 300.29 28.9494 287.407 28.9494M283.591 72.4685C278.488 72.4685 273.913 68.2094 273.913 58.7423V50.0132C273.913 40.5461 278.488 36.287 283.591 36.287C289.663 36.287 293.585 42.1485 293.585 54.4832C293.585 66.8178 288.799 72.4685 283.591 72.4685Z" fill="white">
+                      </path>
+                    </svg>
+                  </div>
+                  <div data-svg-wrapper="" class="bb728-14" style="left: 678.22px; top: 71.66px; position: absolute">
+                    <svg width="9" height="5" viewBox="0 0 9 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3.41573 0.569291H2.0663V4.32239H1.34943V0.569291H0V0H3.41573V0.569291ZM8.87669 4.32239H8.15981V0.716884H8.13871L6.72603 4.32239H6.28327L4.87059 0.716884H4.84948V4.32239H4.13261V0H5.22903L6.5152 3.28923L7.78027 0H8.87669V4.32239Z" fill="white">
+                      </path>
+                    </svg>
+                  </div>
+                  <div class="bb728-34" style="width: 538px; height: 149px; left: 181px; top: 563px; position: absolute; color: black; font-size: 40px; font-family: Avenir; font-weight: 500; line-height: 50px; word-wrap: break-word">Máxima estabilidade com instalação simplificada</div>
+                  <div class="bb728-35" style="width: 569px; height: 183px; left: 181px; top: 287px; position: absolute">
+                    <span style="color: black; font-size: 60px; font-family: Avenir; font-weight: 400; line-height: 55.44px; word-wrap: break-word">
+                      <br>
+                    </span>
+                    <span style="color: black; font-size: 126px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 116.42px; word-wrap: break-word">Base Isofix</span>
+                  </div>
+                  <div class="bb728-36" style="width: 201px; height: 74px; left: 181px; top: 883px; position: absolute; background: #FFCC00; border-radius: 48px">
+                  </div>
+                  <div class="bb728-37" style="left: 216px; top: 895px; position: absolute; color: black; font-size: 40px; font-family: Avenir; font-weight: 800; line-height: 50px; word-wrap: break-word">BB728</div>
+                  <div class="bb728-38" style="width: 268px; height: 74px; left: 418px; top: 883px; position: absolute; background: #251F20; border-radius: 48px">
+                  </div>
+                  <div class="bb728-39" style="left: 448px; top: 895px; position: absolute; color: white; font-size: 40px; font-family: Avenir; font-weight: 800; line-height: 50px; word-wrap: break-word">40 a 87 cm</div>
+                  <div class="bb728-40" style="width: 286px; height: 57px; left: 189px; top: 1145px; position: absolute; color: white; font-size: 25px; font-family: Avenir; font-weight: 300; line-height: 31.25px; word-wrap: break-word">©2026 Mattel.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lamina-layout lamina-layout-mobile" data-lamina-fit="">
+            <div class="bb728-41" data-lamina-fit-board="428" style="width: 428px; height: 4505px; position: relative; background: white; overflow: hidden">
+              <div class="bb728-32" style="width: 428px; height: 724px; left: 0px; top: 0px; position: absolute; overflow: hidden">
+                <img class="bb728-42" style="width: 428px; height: 724px; left: 0px; top: 0px; position: absolute" src="assets/bb728-10.png" decoding="async" loading="lazy">
+                <div class="bb728-40" style="width: 65px; height: 14px; left: 51px; top: 685px; position: absolute; color: black; font-size: 10px; font-family: Avenir; font-weight: 300; line-height: 12.50px; word-wrap: break-word">©2026 Mattel.</div>
+                <div class="bb728-34" style="width: 265px; height: 98px; left: 49px; top: 523px; position: absolute; color: black; font-size: 20px; font-family: Avenir; font-weight: 500; line-height: 25px; word-wrap: break-word">Máxima estabilidade com instalação simplificada</div>
+                <div class="bb728-35" style="width: 236px; height: 79px; left: 49px; top: 458px; position: absolute; color: black; font-size: 50.14px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 46.33px; word-wrap: break-word">Base Isofix</div>
+                <div data-svg-wrapper="" class="bb728-14" style="left: 47.25px; top: 0px; position: absolute">
+                  <svg width="177" height="69" viewBox="0 0 177 69" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M176.248 0H0.752025C0.337357 0 0 0.337357 0 0.752025V53.1548C0 53.8436 0.253018 54.5113 0.702827 55.0384C7.6819 63.1139 17.9853 68.2305 29.4977 68.2305C41.01 68.2305 52.0233 62.7554 58.9953 54.195C65.9744 62.7554 76.5871 68.2305 88.493 68.2305C100.399 68.2305 111.019 62.7554 117.991 54.195C124.97 62.7554 135.589 68.2305 147.488 68.2305C159.387 68.2305 169.311 63.1139 176.283 55.0384C176.733 54.5183 176.986 53.8506 176.986 53.1548V0.752025C176.986 0.337357 176.649 0 176.234 0" fill="#E91D2D">
+                    </path>
+                  </svg>
+                </div>
+                <div data-svg-wrapper="" class="bb728-14" style="left: 57.33px; top: 13.43px; position: absolute">
+                  <svg width="156" height="34" viewBox="0 0 156 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M79.6725 12.2362C79.6725 10.8868 78.6815 9.64982 77.0088 9.64982C75.4485 9.64982 74.0639 10.9641 73.2838 12.5947C73.2135 12.7352 73.0026 12.7352 73.0026 12.5244V11.1047C73.0026 10.4651 72.5036 9.93095 71.836 9.93095H68.2164C67.7877 9.93095 67.5417 10.2121 67.5417 10.5705C67.5417 11.2452 68.1813 11.0695 68.1813 12.9109V23.2355C68.1813 25.0769 67.5417 24.9012 67.5417 25.5759C67.5417 25.9273 67.7877 26.2155 68.2164 26.2155H73.0026C73.3611 26.2155 73.6422 25.9343 73.6422 25.5759C73.6422 24.9012 73.0026 25.0769 73.0026 23.2355V16.4602C73.0026 14.7242 73.9234 13.9441 74.6332 13.9441C75.2376 13.9441 75.9826 14.8297 77.1493 14.8297C78.7448 14.8297 79.6655 13.5505 79.6655 12.2432M50.1186 23.2284L47.2792 14.1128C46.3585 11.1679 44.5803 9.64279 42.4929 9.64279C40.7569 9.64279 39.7941 10.5986 39.1967 11.2382C39.0561 11.4139 38.8804 11.3436 38.8804 11.2031V2.01711C38.8804 1.6657 38.5993 1.3424 38.2057 1.3424H34.0941C33.6654 1.3424 33.4194 1.62353 33.4194 1.98197C33.4194 2.65669 34.059 2.48098 34.059 4.32239V23.2284C34.059 25.0698 33.4194 24.8941 33.4194 25.5689C33.4194 25.9203 33.6654 26.2084 34.0941 26.2084H38.8804C39.2318 26.2084 39.52 25.9273 39.52 25.5689C39.52 24.8941 38.8804 25.0698 38.8804 23.2284V15.0686C38.8804 13.8246 39.5551 12.9039 40.5812 12.9039C41.6074 12.9039 42.2469 13.6489 42.6757 15.0686L45.1918 23.2284C45.6908 25.112 44.8333 25.0698 45.0161 25.7446C45.1215 26.103 45.3675 26.2084 45.7962 26.2084H50.8706C51.2291 26.2084 51.5102 25.8219 51.4048 25.4634C51.2291 24.7887 50.6949 25.0769 50.1256 23.2284M64.9834 20.3609C64.133 20.3609 63.4934 20.8951 63.2123 21.9915C62.9311 23.0176 62.1088 23.9102 60.5556 23.9102C58.8547 23.9102 57.5756 22.6662 56.5846 20.6491C56.5143 20.5085 56.5495 20.3679 56.7252 20.2906L65.9814 15.9612C66.2274 15.8558 66.3047 15.5676 66.2625 15.2865C65.9814 13.7262 63.5285 9.82552 58.7423 9.82552C54.701 9.82552 50.8285 12.8055 50.8285 18.0205C50.8285 22.631 54.2301 26.5317 59.4873 26.5317C63.7113 26.5317 66.5085 23.8329 66.5085 21.9212C66.5085 21.1059 65.9392 20.3609 64.9834 20.3609ZM55.439 18.0205C55.1227 17.1349 54.9751 16.4251 54.9751 15.6098C54.9751 13.5856 56.1418 12.3487 57.6388 12.3487C59.1359 12.3487 60.4431 13.4451 61.2233 15.3287C61.2584 15.4341 61.2584 15.5395 61.153 15.5746L55.6569 18.1259C55.5515 18.1611 55.4812 18.1259 55.446 18.0205M27.1362 16.418C25.4705 15.5676 24.0156 14.7875 24.0156 13.6489C24.0156 12.6228 24.7957 11.9129 25.9343 11.9129C27.2135 11.9129 27.853 12.4822 28.1693 13.6138C28.4153 14.5345 29.09 15.2092 30.1232 15.2092C31.332 15.2092 31.8591 14.3588 31.8591 13.4029C31.8591 11.3788 29.1252 9.64279 26.1452 9.64279C22.1391 9.64279 20.0798 12.0886 20.0798 14.7523C20.0798 17.2685 22.3148 18.7233 24.4092 19.897C26.2506 20.9232 27.9936 21.7384 27.9936 22.877C27.9936 23.7977 27.1432 24.4373 25.9343 24.4373C24.7255 24.4373 24.0156 23.7626 23.6993 22.5608C23.4533 21.6049 22.8489 20.9302 21.7806 20.9302C20.5366 20.9302 20.0095 21.9563 20.0095 22.7365C20.0095 25.0066 22.8489 26.6371 25.864 26.6371C30.088 26.6371 32.2879 24.5076 32.2879 21.5979C32.2879 19.0115 29.4836 17.662 27.1432 16.418M120.422 8.30039C121.983 8.30039 123.227 7.02124 123.227 5.46097C123.227 3.90069 121.983 2.65669 120.422 2.65669C118.862 2.65669 117.583 3.90069 117.583 5.46097C117.583 7.02124 118.827 8.30039 120.422 8.30039ZM18.1259 10.5705C18.1259 10.2191 17.8448 9.93095 17.4863 9.93095H13.3326C12.9109 9.93095 12.6579 10.2121 12.6579 10.5705C12.6579 11.2452 13.2975 11.0695 13.2975 12.9109V23.2355C13.2975 25.0769 12.6579 24.9012 12.6579 25.5759C12.6579 25.9273 12.9039 26.2155 13.3326 26.2155H18.1189C18.4703 26.2155 18.7585 25.9343 18.7585 25.5759C18.7585 24.9012 18.1189 25.0769 18.1189 23.2355V10.5705H18.1259ZM11.2804 2.5864C12.3416 2.5864 13.0515 2.86753 13.6559 3.36654C13.7262 3.43682 13.7614 3.50711 13.6559 3.61253C13.1569 4.11154 12.8758 4.82139 12.8758 5.60153C12.8758 7.16181 14.1198 8.30039 15.7152 8.30039C17.3106 8.30039 18.5195 6.9861 18.5195 5.42583C18.5195 2.62154 15.3287 0 11.0344 0C6.52926 0 2.94485 2.97999 2.94485 9.04538V9.75524C2.94485 9.86067 2.87456 9.93095 2.76914 9.93095H0.674714C0.358442 9.93095 0 10.2472 0 10.6057V11.9551C0 12.3416 0.351414 12.6298 0.674714 12.6298H2.76914C2.87456 12.6298 2.94485 12.7001 2.94485 12.8055V23.2355C2.94485 25.0769 2.30527 24.9012 2.30527 25.5759C2.30527 25.9273 2.55126 26.2155 2.97999 26.2155H7.76624C8.12468 26.2155 8.40581 25.9343 8.40581 25.5759C8.40581 24.9012 7.76624 25.0769 7.76624 23.2355V12.8055C7.76624 12.7001 7.83652 12.6298 7.94195 12.6298H10.5635C10.9219 12.6298 11.2382 12.3487 11.2382 11.9551V10.6057C11.2382 10.2472 10.9219 9.93095 10.5635 9.93095H7.94195C7.83652 9.93095 7.76624 9.86067 7.76624 9.75524V7.44997C7.76624 4.46998 9.15081 2.59343 11.2804 2.59343M137.557 20.9232C136.707 20.9232 136.067 21.5627 135.892 22.3077C135.533 23.622 134.507 24.2967 133.193 24.2967C131.133 24.2967 129.861 22.2726 129.861 18.1611C129.861 14.0495 131.105 12.1308 133.122 12.1308C134.472 12.1308 135.111 12.7704 135.533 14.1198C135.814 15.0054 136.419 15.5746 137.41 15.5746C138.541 15.5746 139.181 14.7594 139.181 13.7684C139.181 11.5685 136.166 9.68496 133.186 9.68496C128.182 9.68496 124.745 13.0585 124.745 18.1611C124.745 23.2636 128.182 26.6371 133.186 26.6371C136.236 26.6371 139.251 24.7606 139.251 22.631C139.251 21.7103 138.612 20.9302 137.55 20.9302M83.0742 15.5676L75.7296 18.9763C75.3712 19.152 75.2306 19.6159 75.4836 19.9673C76.7628 21.8439 79.2789 22.5889 81.4085 21.5979C83.5732 20.6069 84.6344 18.1892 83.9949 15.9963C83.8895 15.6098 83.4256 15.3919 83.0742 15.5676ZM122.875 10.5705C122.875 10.2191 122.594 9.93095 122.236 9.93095H118.082C117.653 9.93095 117.407 10.2121 117.407 10.5705C117.407 11.2452 118.047 11.0695 118.047 12.9109V23.2355C118.047 25.0769 117.407 24.9012 117.407 25.5759C117.407 25.9273 117.653 26.2155 118.082 26.2155H122.868C123.227 26.2155 123.508 25.9343 123.508 25.5759C123.508 24.9012 122.868 25.0769 122.868 23.2355V10.5705H122.875ZM154.193 20.3609C153.343 20.3609 152.703 20.8951 152.422 21.9915C152.141 23.0176 151.326 23.9102 149.758 23.9102C148.058 23.9102 146.778 22.6662 145.787 20.6491C145.717 20.5085 145.752 20.3679 145.928 20.2906L155.184 15.9612C155.43 15.8558 155.5 15.5676 155.465 15.2865C155.184 13.7262 152.731 9.82552 147.945 9.82552C143.904 9.82552 140.031 12.8055 140.031 18.0205C140.031 22.631 143.44 26.5317 148.69 26.5317C152.914 26.5317 155.711 23.8329 155.711 21.9212C155.711 21.1059 155.142 20.3609 154.186 20.3609M144.649 18.0205C144.333 17.1349 144.185 16.4251 144.185 15.6098C144.185 13.5856 145.359 12.3487 146.849 12.3487C148.339 12.3487 149.653 13.4451 150.433 15.3287C150.468 15.4341 150.468 15.5395 150.363 15.5746L144.867 18.1259C144.761 18.1611 144.691 18.1259 144.656 18.0205M113.682 9.64279C112.122 9.64279 110.737 10.9571 109.957 12.5876C109.887 12.7282 109.676 12.7282 109.676 12.5174V11.0976C109.676 10.4581 109.177 9.92392 108.502 9.92392H104.883C104.454 9.92392 104.208 10.205 104.208 10.5635C104.208 11.2382 104.848 11.0625 104.848 12.9039V23.2284C104.848 25.0698 104.208 24.8941 104.208 25.5689C104.208 25.9203 104.454 26.2084 104.883 26.2084H109.669C110.028 26.2084 110.309 25.9273 110.309 25.5689C110.309 24.8941 109.669 25.0698 109.669 23.2284V16.4532C109.669 14.7172 110.59 13.9371 111.3 13.9371C111.904 13.9371 112.649 14.8226 113.816 14.8226C115.411 14.8226 116.332 13.5435 116.332 12.2362C116.332 10.929 115.341 9.64982 113.668 9.64982M95.8094 9.64279C94.0031 9.64279 92.5131 10.3526 91.4448 11.4842C91.3745 11.5545 91.3043 11.5545 91.3043 11.4139V11.0976C91.3043 10.4581 90.7701 9.92392 90.1376 9.92392H86.518C86.0893 9.92392 85.8433 10.205 85.8433 10.5635C85.8433 11.2382 86.4829 11.0625 86.4829 12.9039V30.7135C86.4829 32.555 85.8433 32.3792 85.8433 33.054C85.8433 33.4124 86.0893 33.6935 86.518 33.6935H91.3043C91.6627 33.6935 91.9438 33.4124 91.9438 33.054C91.9438 32.3792 91.3043 32.555 91.3043 30.7135V25.2877C91.3043 25.2174 91.4097 25.1823 91.48 25.2526C92.471 26.2084 93.7852 26.6371 95.2752 26.6371C99.8858 26.6371 102.971 23.1933 102.971 18.1259C102.971 13.0585 100.097 9.64982 95.8024 9.64982M94.5302 24.1562C92.8294 24.1562 91.3043 22.7365 91.3043 19.5808V16.6711C91.3043 13.5154 92.8294 12.0957 94.5302 12.0957C96.5544 12.0957 97.8616 14.0495 97.8616 18.1611C97.8616 22.2726 96.2662 24.1562 94.5302 24.1562Z" fill="white">
+                    </path>
+                  </svg>
+                </div>
+                <div data-svg-wrapper="" class="bb728-14" style="left: 213px; top: 23.55px; position: absolute">
+                  <svg width="3" height="2" viewBox="0 0 3 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.13858 0.189764H0.688768V1.4408H0.449809V0.189764H0V0H1.13858V0.189764ZM2.9589 1.4408H2.71994V0.238961H2.7129L2.24201 1.4408H2.09442L1.62353 0.238961H1.61649V1.4408H1.37754V0H1.74301L2.17173 1.09641L2.59342 0H2.9589V1.4408Z" fill="white">
+                    </path>
+                  </svg>
+                </div>
+                <div data-svg-wrapper="" class="bb728-14" style="left: 49px; top: 621px; position: absolute">
+                  <svg width="51" height="19" viewBox="0 0 51 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="50.5276" height="18.6022" rx="9.3011" fill="#FFCC00">
+                    </rect>
+                  </svg>
+                </div>
+                <div class="bb728-37" style="left: 57.80px; top: 624.02px; position: absolute; color: black; font-size: 10.06px; font-family: Avenir; font-weight: 800; line-height: 12.57px; word-wrap: break-word">BB728</div>
+                <div class="bb728-38" style="width: 67px; height: 19px; left: 109px; top: 621px; position: absolute; background: #251F20; border-radius: 12.07px">
+                </div>
+                <div class="bb728-39" style="left: 116.12px; top: 624.02px; position: absolute; color: white; font-size: 10.06px; font-family: Avenir; font-weight: 800; line-height: 12.57px; word-wrap: break-word">40 a 87 cm</div>
+              </div>
+              <div class="bb728-2" style="width: 428px; height: 940px; left: 0px; top: 3565px; position: absolute; background: #59CBE8">
+              </div>
+              <img class="bb728-44" style="width: 359px; height: 410.50px; left: 0px; top: 3596px; position: absolute" src="assets/bb728-11.png" decoding="async" loading="lazy">
+              <div class="bb728-3" style="width: 237px; height: 58px; left: 61px; top: 4006px; position: absolute; color: white; font-size: 40px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 41.36px; word-wrap: break-word">Ficha técnica:</div>
+              <div class="bb728-45" style="width: 428px; height: 801px; left: -1px; top: 2764px; position: absolute; background: white; overflow: hidden">
+                <img class="bb728-46" style="width: 427px; height: 801px; left: 1px; top: 0px; position: absolute" src="assets/bb728-12.png" decoding="async" loading="lazy">
+                <div class="bb728-7" style="width: 357px; height: 118px; left: 36px; top: 175px; position: absolute; text-align: center; color: black; font-size: 16px; font-family: Montserrat; font-weight: 400; word-wrap: break-word">Um produto que oferece cuidado, segurança e conforto para aproveitar cada fase de crescimento do seu pequeno com mais tranquilidade.</div>
+                <div class="bb728-8" style="width: 322px; height: 70px; left: 53px; top: 91px; position: absolute; text-align: center; color: black; font-size: 32px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 33.09px; word-wrap: break-word">Fisher-Price™ confiança que cresce junto </div>
+                <img class="bb728-47" style="width: 428px; height: 428px; left: 0px; top: 293px; position: absolute" src="assets/bb728-13.png" decoding="async" loading="lazy">
+                <div class="bb728-10" style="width: 375px; height: 23px; left: 27px; top: 759px; position: absolute; text-align: center; color: black; font-size: 14px; font-family: Montserrat; font-weight: 400; word-wrap: break-word">Bebê conforto BB727 vendido separadamente.</div>
+              </div>
+              <div class="bb728-48" style="width: 428px; height: 787px; left: 0px; top: 1977px; position: absolute; background: #F1EFED; overflow: hidden">
+                <div class="bb728-16" style="width: 375px; height: 99px; left: 26px; top: 161px; position: absolute; text-align: center; color: black; font-size: 16px; font-family: Montserrat; font-weight: 400; word-wrap: break-word">Instalação rápida e intuitiva, simplifica o encaixe do bebê conforto, deixando a rotina da família mais leve e descomplicada. </div>
+                <div class="bb728-10" style="width: 375px; height: 99px; left: 26px; top: 260px; position: absolute; text-align: center; color: black; font-size: 14px; font-family: Montserrat; font-weight: 400; word-wrap: break-word">Bebê conforto BB727 vendido separadamente.</div>
+                <div class="bb728-8" style="width: 322px; height: 70px; left: 52px; top: 63px; position: absolute; text-align: center; color: black; font-size: 32px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 33.09px; word-wrap: break-word">Mais praticidade<br>para o seu dia a dia</div>
+                <img class="bb728-49" style="width: 428px; height: 436px; left: 0px; top: 351px; position: absolute" src="assets/bb728-14.png" decoding="async" loading="lazy">
+              </div>
+              <div class="bb728-6" style="width: 428px; height: 650px; left: 0px; top: 1327px; position: absolute; background: white; overflow: hidden">
+                <div class="bb728-19" style="width: 379px; height: 118px; left: 25px; top: 195px; position: absolute; text-align: center; color: black; font-size: 16px; font-family: Montserrat; font-weight: 500; word-wrap: break-word">Projetada para ser o alicerce de proteção do seu bebê. A combinação dos conectores Isofix com a perna de suporte cria uma ancoragem dupla que mantém a base bem ajustada e sem oscilações. <br>
+                </div>
+                <img class="bb728-51" style="width: 428px; height: 650px; left: 0px; top: 0px; position: absolute" src="assets/bb728-15.png" decoding="async" loading="lazy">
+                <div class="bb728-20" style="width: 348px; height: 98px; left: 40px; top: 82px; position: absolute; text-align: center; color: black; font-size: 30px; font-family: Let\'s Be Glyphs; font-weight: 500; line-height: 31.02px; word-wrap: break-word">Mais segurança e estabilidade em<br>cada trajeto</div>
+                <img class="bb728-22" style="width: 339px; height: 339px; left: 40px; top: 301px; position: absolute" src="assets/bb728-16.png" decoding="async" loading="lazy">
+              </div>
+              <div class="bb728-18" style="width: 428px; height: 603px; left: 0px; top: 724px; position: absolute; background: #F1EFED; overflow: hidden">
+                <div class="bb728-25" style="width: 156.47px; height: 143.53px; left: 35px; top: 182.18px; position: absolute; text-align: center">
+                  <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 800; line-height: 18.45px; word-wrap: break-word">Fixação reforçada<br>
+                  </span>
+                  <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 400; line-height: 18.45px; word-wrap: break-word">
+                    <br>Sistema de retenção Isofix + perna de suporte para maior estabilidade no veículo.</span>
+                  </div>
+                  <img class="bb728-52" style="width: 99.50px; height: 99.50px; left: 66.76px; top: 51px; position: absolute" src="assets/bb728-17.png" decoding="async" loading="lazy">
+                  <div class="bb728-27" style="width: 187.65px; height: 77.65px; left: 214px; top: 182.18px; position: absolute; text-align: center">
+                    <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 800; text-transform: capitalize; line-height: 18.45px; word-wrap: break-word">Encaixe com um clique<br>
+                    </span>
+                    <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 400; text-transform: capitalize; line-height: 18.45px; word-wrap: break-word">
+                      <br>Facilidade para colocar e retirar o bebê conforto.<br>
+                    </span>
+                  </div>
+                  <img class="bb728-53" style="width: 99px; height: 99px; left: 258.71px; top: 51px; position: absolute" src="assets/bb728-18.png" decoding="async" loading="lazy">
+                  <img class="bb728-53" style="width: 99px; height: 99px; left: 164.71px; top: 347px; position: absolute" src="assets/bb728-19.png" decoding="async" loading="lazy">
+                  <div class="bb728-27" style="width: 187.65px; height: 77.65px; left: 120px; top: 478.18px; position: absolute; text-align: center">
+                    <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 800; line-height: 18.45px; word-wrap: break-word">Acompanha desde o primeiro dia<br>
+                    </span>
+                    <span style="color: black; font-size: 16.47px; font-family: Avenir; font-weight: 400; line-height: 18.45px; word-wrap: break-word">Para bebês de 40 a 87 cm.<br>
+                    </span>
+                  </div>
+                </div>
+                <div class="bb728-4" style="width: 314px; height: 470px; left: 61px; top: 4057px; position: absolute">
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Marca: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">Fisher-Price™ <br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Tipo de material: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">plástico e metal<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Composição: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">HDPE e ferro<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Tipo de arreio: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">sistema de retenção isofix <br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Cor: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">preta<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Dimensões do produto: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">16 x 34 x 61 cm<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">EAN: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">7899548508740<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Garantia: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">12 meses<br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">Conteúdo da embalagem: </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 400; word-wrap: break-word">1 base Isofix e 1 manual de instruções. <br>
+                  </span>
+                  <span style="color: white; font-size: 20.53px; font-family: Avenir; font-weight: 900; word-wrap: break-word">
+                    <br>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script src="https://djibrasil.vteximg.com.br/arquivos/processor.js?v=20260602-tabs"></script>
+          <script>
+                                        // lamina-qa - escala proporcional da prancheta mobile pela largura do container (ate 856px de largura).
+                                        (() => {
+                                          const MAX_WIDTH = 856;
+                                          const layout = document.querySelector(".lamina-layout-mobile[data-lamina-fit]");
+                                          const board = layout && layout.querySelector(":scope > [data-lamina-fit-board]");
+                                          if (!board) return;
+                                        
+                                          const designWidth = parseFloat(board.dataset.laminaFitBoard) || 428;
+                                          layout.style.setProperty("--lamina-fit-width", `${designWidth}px`);
+                                        
+                                          function fit() {
+                                            const width = layout.clientWidth;
+                                            if (!width) return;
+                                            const scale = Math.min(width, MAX_WIDTH) / designWidth;
+                                            layout.style.setProperty("--lamina-fit-scale", scale);
+                                            layout.style.setProperty("--lamina-fit-offset", `${(width - designWidth * scale) / 2}px`);
+                                            layout.style.setProperty("--lamina-fit-height", `${board.offsetHeight * scale}px`);
+                                          }
+                                        
+                                          fit();
+                                          if ("ResizeObserver" in window) {
+                                            const observer = new ResizeObserver(fit);
+                                            observer.observe(layout);
+                                            observer.observe(board);
+                                          }
+                                          window.addEventListener("resize", fit, { passive: true });
+                                          window.addEventListener("load", fit);
+                                          document.fonts?.ready?.then(fit);
+                                        })();
+                                        </script>
+        </body>
+      </html>
